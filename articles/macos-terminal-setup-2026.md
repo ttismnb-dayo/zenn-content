@@ -1,5 +1,5 @@
 ---
-title: "【2026年版】macOS 開発者が最初に入れるターミナル設定集"
+title: "【2026年版】macOS 開発者が最初にやるターミナル設定まとめ"
 emoji: "🛠"
 type: "tech"
 topics: ["macos", "開発環境", "terminal", "zsh", "初期設定"]
@@ -9,13 +9,20 @@ published: true
 # macOS 開発者向け 初期設定手順（ターミナル編）
 
 この記事は、**新しいMacに買い替えた開発者**や、  
-**macOSを開発向けに最適化したい人**向けのターミナル設定まとめです。
+**macOSを開発向けに最適化したい人**向けのターミナル設定まとめです。  
+「毎回同じことを手でやるのが面倒」「再現できる形で残したい」人に刺さります。
 
 この記事でやることは次のとおりです。
 
 - Finder / キーボード / Dock / スクショ周りを「開発者向け」に整える
 - すべてターミナル（defaults）で設定し、再現性を持たせる
 - 設定が入ったか `defaults read` で検証できるようにする
+
+## TL;DR（先に結論）
+- Finder は「リスト表示 + パス/ステータスバー + 隠しファイル表示」が最速
+- キーリピート高速化と長押し無効化は体感が段違い
+- Dock は自動表示 + 高速化で作業領域が増える
+- スクショは保存先を固定して散らばりを防ぐ
 
 ## 前提
 - macOS
@@ -24,6 +31,47 @@ published: true
 <!-- TOC -->
 
 ---
+
+## 0. まとめて入れたい人向け（コピペ用）
+必要な人だけ実行してください。細かく見たい人は次のセクションへ。
+
+```bash
+# Finder
+defaults write com.apple.finder AppleShowAllFiles -bool true
+defaults write -g AppleShowAllExtensions -bool true
+defaults write com.apple.finder ShowPathbar -bool true
+defaults write com.apple.finder ShowStatusBar -bool true
+defaults write com.apple.finder _FXSortFoldersFirst -bool true
+defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+killall Finder
+
+# Keyboard
+defaults write -g InitialKeyRepeat -int 15
+defaults write -g KeyRepeat -int 2
+defaults write -g ApplePressAndHoldEnabled -bool false
+
+# Dock
+defaults write com.apple.dock autohide -bool true
+defaults write com.apple.dock autohide-delay -float 0
+defaults write com.apple.dock autohide-time-modifier -float 0.15
+killall Dock
+
+# Screenshot
+mkdir -p ~/Desktop/Screenshots
+defaults write com.apple.screencapture location ~/Desktop/Screenshots
+defaults write com.apple.screencapture name "screenshot"
+defaults write com.apple.screencapture disable-shadow -bool true
+killall SystemUIServer
+
+# UI
+defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
+defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
+
+# Network
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+```
+
+※ 反映には再ログインが必要な項目があります（後述）。
 
 ## 1. Finder・ファイル管理系
 
@@ -157,9 +205,14 @@ defaults read com.apple.screencapture location
 defaults read com.apple.dock autohide
 ```
 
+## 8. 反映タイミングの注意
+- Finder / Dock / SystemUIServer は `killall` で即時反映
+- キーボード系は**再ログイン後**に反映されることが多い
+- 「反映されない」ときは再ログインを挟むのが確実
+
 ---
 
-## 8. 元に戻したい場合
+## 9. 元に戻したい場合
 
 ```bash
 defaults delete <domain> <key>
