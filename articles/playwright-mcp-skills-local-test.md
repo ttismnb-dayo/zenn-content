@@ -1,24 +1,23 @@
 ---
-title: "Playwright MCP × Skillsで、ローカルテストが一気に速くなった"
+title: "Playwright MCP × Markdown指示書で、ローカルテストが一気に速くなった"
 emoji: "🧪"
 type: "tech"
 topics: ["playwright", "testing", "copilot", "mcp", "automation"]
 published: true
 ---
 
-# Playwright MCP × Skillsで、ローカルテストが一気に速くなった
+# Playwright MCP × Markdown指示書で、ローカルテストが一気に速くなった
 
 この記事では、**ローカルでUI確認を回すことが多いフロントエンド担当向け**に、
-毎回の長いプロンプト運用をやめて、Skills + Markdown に寄せて修正サイクルを短縮できた話をまとめます。
+毎回の長いプロンプト運用をやめて、Markdown の指示書に寄せて修正サイクルを短縮できた話をまとめます。
+本当は Claude Code を使いたかったけれど、社内の都合で Copilot Chat しか使えない人向けです。
 
 ## TL;DR（先に結論）
-- 共通の指示を Skills に逃がして、プロンプトを短くする
-- その回のテスト内容だけを Markdown に書く
-- ローカルテストを「短い指示で即実行」に寄せる
+- その回のテスト内容は Markdown の指示書にだけ書く
+- 実行時にその md を指定して Playwright MCP を回す
 
 ## 前提
 - Playwright MCP を使える環境
-- GitHub Copilot Skills を使う運用
 - テスト内容を Markdown にまとめる方針
 
 <!-- TOC -->
@@ -30,8 +29,8 @@ published: true
 Playwright MCP でローカルテストを回していると、UI の仕様変更が頻繁に入って、同じテストを何度も回すことになります。そのたびに、テスト内容をプロンプトへ貼り付け直すのが地味にしんどかったです。
 
 そこで、
-- 共通の指示は Skills にまとめる
-- その回のテスト内容は Markdown に書く
+- その回のテスト内容は Markdown の指示書に書く
+- 実行時はその md を指定して Playwright MCP を回す
 
 という運用にしました。
 結果、プロンプトがかなり短くなって、修正→確認のサイクルが体感で半分くらいに短縮されました。
@@ -46,17 +45,13 @@ Playwright MCP でローカルテストを回していると、UI の仕様変�
 
 ```text
 frontend-repo/
-├─ .github/skills/fe-testing/
-│  ├─ SKILL.md          # テスト担当としての振る舞い・判断軸
-│  └─ reference.md      # FEテスト担当のためのREADME（やり方・運用ルール）
 ├─ tests/specs/
-│  ├─ _template.spec.md # テスト内容(Markdown)のテンプレ
-│  └─ login.spec.md     # 機能ごとのテスト内容（基準）
+│  ├─ _template.spec.md # 指示書(Markdown)のテンプレ
+│  └─ login.spec.md     # 機能ごとの指示書（基準）
 └─ playwright/README.md # 実行方法・環境・CI設定の入口
 ```
 
-- WHAT（その回のテスト内容）：tests/specs/*.spec.md
-- HOW（共通の振る舞い・実装方針）：skills/fe-testing
+- WHAT（その回の指示書）：tests/specs/*.spec.md
 - 実行方法：playwright/README.md
 
 ### 構成図
@@ -65,33 +60,30 @@ frontend-repo/
 
 ```mermaid
 flowchart LR
-  Spec["tests/specs/*.spec.md<br/>（テスト内容・ここが基準）"] --> Code["Playwright テスト実装"]
-  Skill["SKILL.md<br/>（振る舞い・方針）"] --> Code
-  Ref["reference.md<br/>（やり方・運用ルール）"] --> Code
+  Spec["tests/specs/*.spec.md<br/>（指示書・ここが基準）"] --> Code["Playwright テスト実装"]
   Code --> MCP["Playwright MCP<br/>（実行・再実行）"]
 ```
 
 ### この構成のポイント（ざっくり）
 
-- 毎回のプロンプトから「共通の指示」を抜く
-- テスト内容は Markdown にだけ書く
-- 実行は MCP に投げる
+- 指示内容は Markdown にだけ書く
+- 実行時にその md を MCP に投げる
 
 ---
 
-## なぜ Markdown をテスト内容にしたのか
+## なぜ Markdown を指示書にしたのか
 
 UI の仕様変更が多いと、同じテストを何度もやり直すことになります。
 そのたびにプロンプトへ貼り付けるのが面倒で、地味にミスります。
 
-そこで、テスト内容は Markdown ファイルにまとめて、
-プロンプトには「このファイルのテストやって」とだけ書く形にしました。
+そこで、テスト内容は Markdown の指示書にまとめて、
+プロンプトには「このファイル指定で Playwright MCP 実行して」とだけ書く形にしました。
 これだけで、毎回の指示コストがほぼゼロになります。
 なお、この記事はローカル確認を前提にしています（本番運用やCIは対象外）。
 
 ---
 
-## テスト内容（Markdown）の例
+## 指示書（Markdown）の例
 
 ```markdown
 # Login Feature IT Test
@@ -117,36 +109,12 @@ Gherkin でなくても問題ありません。
 
 ---
 
-## Skill と Reference の役割分担
-
-ここが一番重要なポイントです。
-
-### SKILL.md（どう振る舞うか）
-
-- spec(Markdown) を基準にする
-- 推測でテストケースを増やさない
-- sleep を使わず安定した待機を優先する
-- 失敗したら原因を切り分けてから修正する
-
-テスト担当としての姿勢や判断軸を書きます。
-
-### reference.md（どうやるか）
-
-- セレクタは data-testid を優先
-- locator + expect で待機する
-- flaky の典型と対処
-- MCP 実行時の基本フロー
-
-FEテスト担当のための README です。
-
----
-
 ## Playwright MCP × Copilot の流れ
 
 1. Plan
    - spec(Markdown) を読み、テスト実装計画を立てる
 2. Edit
-   - spec に従ってテストを実装し、MCPで実行
+   - spec を指定して MCP を実行し、結果に合わせて実装
 3. Fix
    - 失敗理由を切り分け（selector / wait / 仕様ズレ）
    - 最小修正して再実行
@@ -179,10 +147,10 @@ FEテスト担当のための README です。
 ```
 
 ### After
-テスト内容は Markdown に置いて、プロンプトはこれだけにしました。
+指示書は Markdown に置いて、プロンプトはこれだけにしました。
 
 ```text
-このファイルのテスト実施して
+`tests/specs/login.spec.md` を指定して Playwright MCP 実行して
 ```
 
 ---
@@ -211,6 +179,4 @@ FEテスト担当のための README です。
 
 - Playwright MCP は強力
 - ただし、仕様が曖昧だと不安定
-- Markdown を基準にし、Skills で共通の指示を固めると安定する
-
-次は「SKILL.md と reference.md の中身テンプレ」も用意する予定です。
+- Markdown を基準にすると安定する
