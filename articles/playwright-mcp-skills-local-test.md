@@ -6,7 +6,7 @@ topics: ["playwright", "testing", "copilot", "mcp", "automation"]
 published: true
 ---
 
-# Playwright MCP × Markdown指示書で、ローカルテストが一気に速くなった
+# Playwright MCP × Markdownで、ローカルテストが一気に速くなった
 
 この記事では、**ローカルでUI確認を回すことが多いフロントエンド担当向け**に、
 毎回の長いプロンプト運用をやめて、Markdown の指示書に寄せて修正サイクルを短縮できた話をまとめます。
