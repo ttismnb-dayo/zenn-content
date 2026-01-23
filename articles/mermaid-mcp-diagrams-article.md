@@ -94,7 +94,7 @@ diagrams.net（貼り付け）
 SVG（成果物）
 ```
 
-![Claude Code で生成した Mermaid を diagrams.net に貼り付けた例](../images/screenshot%202026-01-07%2019.58.10.png)
+![Claude Code で生成した Mermaid を diagrams.net に貼り付けた例](../images/mermaid-mcp-diagram.png)
 *Claude Code で生成した Mermaid を diagrams.net に貼り付けた例*
 
 ---
