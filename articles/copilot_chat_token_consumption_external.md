@@ -1,14 +1,14 @@
 ---
-title: "GitHub Copilot Chat におけるトークン消費の仕組み"
+title: "GitHub Copilot Premium Requests におけるトークン消費の仕組み"
 emoji: "🔢"
 type: "tech"
-topics: ["githubcopilot", "chatgpt", "openai", "token", "llm"]
+topics: ["githubcopilot", "premiumrequests", "openai", "token", "llm"]
 published: false
 ---
 
-# GitHub Copilot Chat におけるトークン消費の仕組み
+# GitHub Copilot Premium Requests におけるトークン消費の仕組み
 
-この記事は、**GitHub Copilot Chat のトークン消費を理解したい人**や、**トークン消費を最適化したい人**向けの記事です。
+この記事は、**GitHub Copilot Premium Requests のトークン消費が、どのように発生するのか、その内部メカニズムを理解したい人**向けの記事です。
 
 OpenAI および GitHub が公開している公式ドキュメントと、日常的な GitHub Copilot Chat 利用における実運用上の挙動を突き合わせて整理しました。
 
@@ -26,8 +26,9 @@ GitHub Copilot Chat の内部実装や詳細な仕様は公式にすべて公開
 
 ## 前提
 
-- ChatGPT または GitHub Copilot Chat を利用している
-- トークンの基本概念を理解したい、または消費を抑えたい
+- GitHub Copilot Chat を利用している
+- Premium Requests の概念を理解したい
+- 「なぜ短い入力でも多くのトークンが消費されるのか」を知りたい
 
 ---
 
@@ -169,7 +170,7 @@ Copilot Chat に常駐メモリは存在しないため、これらの指示書�
 
 ---
 
-## 5. トークン消費を抑えるための設計指針
+## 5. 参考：トークン消費を意識した設計
 
 ### 推奨される工夫
 
@@ -193,18 +194,35 @@ src/api/user.ts のみを対象にしてください
 
 ---
 
-## まとめ
+## まとめ：GitHub Copilot Chat のトークン消費の仕組み
 
-- Copilot Chat のトークン消費は「入力トークン + 出力トークン」の合算
-- 入力トークンには、ユーザーに見えない IDE / リポジトリ文脈が含まれる
-- instructions / skills / AGENTS 系ファイルは、条件次第で参照されやすい
-- Copilot Chat に永続的な常駐メモリは存在しない
-- 設計と使い方次第で、トークン消費と精度は十分にコントロール可能
+### 核となる理解
+
+1. **トークン消費の基本式**
+   - トークン消費 = 入力トークン + 出力トークン
+   - ユーザーが短い入力をしても、背後では大量の文脈がリクエストに含まれうる
+
+2. **入力トークンに含まれるもの（ユーザーに見えない部分）**
+   - システム指示（Copilot の振る舞い定義）
+   - IDE の状態（アクティブファイル、選択中のコード）
+   - リポジトリ文脈（package.json、README.md、関連ファイルの断片）
+   - instructions / skills / AGENTS 等の指示書（参照と判定された場合）
+
+3. **文脈の再構築**
+   - Copilot Chat に永続的なメモリは存在しない
+   - チャット履歴は保持される が、IDE 文脈はリクエストごとに再判定される
+   - 同じ質問をしても、IDE の状態が異なれば、入力トークンが変わる可能性がある
+
+4. **instructions / skills ファイルの参照判定**
+   - これらのファイルが常に参照されるわけではない
+   - ファイルのサイズ、ファイル名、質問の種類などに基づいて、参照するかどうかが判定される
+   - 判定ロジックは公開されておらず、実運用上の観測に基づいている
 
 ---
 
 ## 参考
 
 - [What are tokens and how to count them - OpenAI](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them)
+- [GitHub Copilot Premium Requests - GitHub Docs](https://docs.github.com/ja/billing/concepts/product-billing/github-copilot-premium-requests)
 - [Copilot requests and billing - GitHub Docs](https://docs.github.com/en/copilot/concepts/billing/copilot-requests)
 - [GitHub Models billing - GitHub Docs](https://docs.github.com/ja/billing/concepts/product-billing/github-models)
