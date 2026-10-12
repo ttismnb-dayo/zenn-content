@@ -25,7 +25,7 @@ published: true
 - スクショは保存先を固定して散らばりを防ぐ
 
 ## 前提
-- macOS 27
+- macOS 27.0（この環境で設定値の反映を `defaults read` で確認済み）
 - ターミナル（zsh）
 
 ---
@@ -64,6 +64,11 @@ killall SystemUIServer
 # UI
 defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
 defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
+
+# Text input
+defaults write -g NSAutomaticCapitalizationEnabled -bool false
+defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
+defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
 
 # Network
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
@@ -187,7 +192,30 @@ defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
 ---
 
-## 6. ネットワーク
+## 6. 入力・テキスト編集系
+
+コードやコマンドをメモアプリなどに貼ったとき、記号が勝手に変換されるのを防ぎます。
+
+### 自動大文字化を無効化
+```bash
+defaults write -g NSAutomaticCapitalizationEnabled -bool false
+```
+
+### スマート引用符を無効化（`"` が `“ ”` に変わらない）
+```bash
+defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
+```
+
+### スマートダッシュを無効化（`--` が `—` に変わらない）
+```bash
+defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
+```
+
+※ 開いているアプリには、再起動またはログアウト → ログイン後に反映されます。
+
+---
+
+## 7. ネットワーク
 
 ### ネットワーク上に .DS_Store を作らせない
 ```bash
@@ -196,7 +224,7 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 
 ---
 
-## 7. 設定確認コマンド
+## 8. 設定確認コマンド
 
 ```bash
 defaults read com.apple.finder AppleShowAllFiles
@@ -216,17 +244,20 @@ defaults read com.apple.screencapture name
 defaults read com.apple.screencapture disable-shadow
 defaults read NSGlobalDomain AppleShowScrollBars
 defaults read NSGlobalDomain AppleKeyboardUIMode
+defaults read -g NSAutomaticCapitalizationEnabled
+defaults read -g NSAutomaticQuoteSubstitutionEnabled
+defaults read -g NSAutomaticDashSubstitutionEnabled
 defaults read com.apple.desktopservices DSDontWriteNetworkStores
 ```
 
-## 8. 反映タイミングの注意
+## 9. 反映タイミングの注意
 - Finder / Dock / SystemUIServer は `killall` で即時反映
 - キーボード系は**ログアウト → ログイン後**に反映されることが多い
 - 「反映されない」ときは、再起動すると確実です
 
 ---
 
-## 9. 元に戻したい場合
+## 10. 元に戻したい場合
 
 ```bash
 defaults delete <domain> <key>
