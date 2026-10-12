@@ -275,7 +275,7 @@ killall Finder
 
 今後は、以下の内容も順次まとめていく予定です。
 
-- iTerm2 / zsh / Powerlevel10k の最小構成
+- iTerm2 / zsh / starship の最小構成
 - Node / Python のバージョン管理（mise を使った実務向け構成）
 - 新しいMac用のセットアップスクリプト（1コマンドで完了）
 
