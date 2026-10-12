@@ -1,15 +1,15 @@
 ---
-title: "【2026年版】macOS 開発者が最初にやるターミナル設定まとめ"
+title: "【2026年版】macOS 開発者が最初にやる初期設定まとめ（defaults 編）"
 emoji: "🛠"
 type: "tech"
 topics: ["macos", "開発環境", "terminal", "zsh", "初期設定"]
 published: true
 ---
 
-# macOS 開発者向け 初期設定手順（ターミナル編）
+# macOS 開発者向け 初期設定手順（defaults 編）
 
 この記事は、**新しいMacに買い替えた開発者**や、  
-**macOSを開発向けに最適化したい人**向けのターミナル設定まとめです。  
+**macOSを開発向けに最適化したい人**向けの初期設定まとめです。  
 「毎回同じことを手でやるのが面倒」「再現できる形で残したい」人に刺さります。
 
 この記事でやることは次のとおりです。
@@ -21,19 +21,17 @@ published: true
 ## TL;DR（先に結論）
 - Finder は「リスト表示 + パス/ステータスバー + 隠しファイル表示」が最速
 - キーリピート高速化と長押し無効化は体感が段違い
-- Dock は自動表示 + 高速化で作業領域が増える
+- Dock は自動で隠す + 高速化で作業領域が増える
 - スクショは保存先を固定して散らばりを防ぐ
 
 ## 前提
-- macOS
+- macOS 27
 - ターミナル（zsh）
-
-<!-- TOC -->
 
 ---
 
 ## 0. まとめて入れたい人向け（コピペ用）
-必要な人だけ実行してください。細かく見たい人は次のセクションへ。
+必要な人だけ実行してください。**実行前に中身を確認してください。** 細かく見たい人は次のセクションへ。
 
 ```bash
 # Finder
@@ -80,6 +78,7 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 defaults write com.apple.finder AppleShowAllFiles -bool true
 killall Finder
 ```
+※ 不要になったら Finder 上で `Cmd + Shift + .` を押すと、表示と非表示を切り替えられます。
 
 ### 拡張子を常に表示（事故防止）
 ```bash
@@ -119,13 +118,14 @@ killall Finder
 defaults write -g InitialKeyRepeat -int 15
 defaults write -g KeyRepeat -int 2
 ```
-※ 再ログイン後に反映
+※ ログアウト → ログイン後に反映
 
 ### 長押しアクセント入力を無効化（aaaa 連打できる）
 ```bash
 defaults write -g ApplePressAndHoldEnabled -bool false
 ```
-※ 再ログイン後に反映
+※ ログアウト → ログイン後に反映  
+※ 長押しで `é` などのアクセント文字を入力できなくなります。必要な場合は `defaults delete -g ApplePressAndHoldEnabled` で戻せます。
 
 ---
 
@@ -154,6 +154,7 @@ mkdir -p ~/Desktop/Screenshots
 defaults write com.apple.screencapture location ~/Desktop/Screenshots
 killall SystemUIServer
 ```
+※ iCloud の「デスクトップと書類フォルダ」を有効にしている場合、スクリーンショットも iCloud に同期されます。同期したくない場合は `~/Pictures/Screenshots` などに変更してください。
 
 ### ファイル名をシンプルに
 ```bash
@@ -186,7 +187,7 @@ defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
 ---
 
-## 6. Git / ネットワーク系（事故防止）
+## 6. ネットワーク
 
 ### ネットワーク上に .DS_Store を作らせない
 ```bash
@@ -200,15 +201,28 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 ```bash
 defaults read com.apple.finder AppleShowAllFiles
 defaults read -g AppleShowAllExtensions
+defaults read com.apple.finder ShowPathbar
+defaults read com.apple.finder ShowStatusBar
+defaults read com.apple.finder _FXSortFoldersFirst
+defaults read com.apple.finder FXPreferredViewStyle
+defaults read -g InitialKeyRepeat
 defaults read -g KeyRepeat
-defaults read com.apple.screencapture location
+defaults read -g ApplePressAndHoldEnabled
 defaults read com.apple.dock autohide
+defaults read com.apple.dock autohide-delay
+defaults read com.apple.dock autohide-time-modifier
+defaults read com.apple.screencapture location
+defaults read com.apple.screencapture name
+defaults read com.apple.screencapture disable-shadow
+defaults read NSGlobalDomain AppleShowScrollBars
+defaults read NSGlobalDomain AppleKeyboardUIMode
+defaults read com.apple.desktopservices DSDontWriteNetworkStores
 ```
 
 ## 8. 反映タイミングの注意
 - Finder / Dock / SystemUIServer は `killall` で即時反映
-- キーボード系は**再ログイン後**に反映されることが多い
-- 「反映されない」ときは再ログインを挟むのが確実
+- キーボード系は**ログアウト → ログイン後**に反映されることが多い
+- 「反映されない」ときは、再起動すると確実です
 
 ---
 
